@@ -24,11 +24,8 @@
 
 import Cocoa
 
-class StateViewController: NSViewController {
-
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        // Do view setup here.
-    }
+class ImageCollectionHeaderView: NSVisualEffectView, NSCollectionViewElement {
     
+    @IBOutlet weak var sectionTitle: NSTextField!
+    @IBOutlet weak var imageCount: NSTextField!
 }

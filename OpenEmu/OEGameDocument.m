@@ -731,7 +731,7 @@ typedef enum : NSUInteger
             handler(YES, nil);
         }];
     } errorHandler:^(NSError *error) {
-        [[[OEBindingsController defaultBindingsController] systemBindingsForSystemController:self->_systemPlugin.controller] removeBindingsObserver:self];
+//        [[[OEBindingsController defaultBindingsController] systemBindingsForSystemController:self->_systemPlugin.controller] removeBindingsObserver:self];
         self->_gameCoreManager = nil;
         [self close];
         

@@ -22,37 +22,41 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import Cocoa
+import Foundation
 
-@objc
-class ScreenshotsViewController: NSViewController {
+final class ImageCacheService {
+    private var cache = NSCache<NSString, NSImage>()
     
-    @objc
-    weak public var libraryController: OELibraryController!
+    public static var shared = ImageCacheService()
     
-    override var representedObject: Any? {
-        didSet {
-            let _ = self.view
+    public func fetchImage(_ url: URL, success: @escaping (NSImage) -> Void) {
+        if let img = cache.object(forKey: url.absoluteString as NSString) {
+            success(img)
+            return
+        }
+        
+        DispatchQueue.global(qos: .userInteractive).async {
+            // lets load it!
+            let imageSource = CGImageSourceCreateWithURL(url as CFURL, nil)
+            if let imageSource = imageSource {
+                guard CGImageSourceGetType(imageSource) != nil else { return }
+                if let thumbnail = self.getThumbnailImage(imageSource: imageSource) {
+                    let bytes = Int(thumbnail.size.width * thumbnail.size.height * 4)
+                    self.cache.setObject(thumbnail, forKey: url.absoluteString as NSString, cost: bytes)
+                    DispatchQueue.main.async {
+                        success(thumbnail)
+                    }
+                }
+            }
         }
     }
     
-    override var nibName: NSNib.Name? {
-        return NSNib.Name("ScreenshotsViewController")
-    }
-
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        // Do view setup here.
-    }
-    
-    override func viewWillAppear() {
-        super.viewWillAppear()
-        
-        setupToolbar()
-    }
-    
-    func setupToolbar() {
-        
-        
+    private func getThumbnailImage(imageSource: CGImageSource) -> NSImage? {
+        let thumbnailOptions = [
+            String(kCGImageSourceCreateThumbnailFromImageIfAbsent): true,
+            String(kCGImageSourceThumbnailMaxPixelSize): 320
+            ] as [String : Any]
+        guard let thumbnailRef = CGImageSourceCreateThumbnailAtIndex(imageSource, 0, thumbnailOptions as CFDictionary) else { return nil}
+        return NSImage(cgImage: thumbnailRef, size: NSSize.zero)
     }
 }

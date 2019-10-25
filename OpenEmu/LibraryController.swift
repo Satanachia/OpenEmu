@@ -61,24 +61,35 @@ class OELibraryController: NSViewController {
         libraryGamesViewController = OELibraryGamesViewController()
         libraryGamesViewController.libraryController = self
         
+        #if !USE_NEW
         saveStatesViewController = OEMediaViewController()
         saveStatesViewController.libraryController = self
         saveStatesViewController.representedObject = OEDBSavedGamesMedia.shared
-        
+
         screenshotsViewController = OEMediaViewController()
         screenshotsViewController.libraryController = self
         screenshotsViewController.representedObject = OEDBScreenshotsMedia.shared
-        
-        screenshotsViewController2 = ScreenshotsViewController()
+        #else
+        saveStatesViewController2 = SaveStateViewController()
+        saveStatesViewController2.libraryController = self;
+        saveStatesViewController2.representedObject = OEDBSavedGamesMedia.shared;
+
+        screenshotsViewController2 = ScreenshotViewController()
         screenshotsViewController2.libraryController = self;
         screenshotsViewController2.representedObject = OEDBScreenshotsMedia.shared;
+        #endif
         
         homebrewViewController = OEHomebrewViewController();
         homebrewViewController.libraryController = self;
         
         addChild(libraryGamesViewController)
+        #if !USE_NEW
         addChild(saveStatesViewController)
         addChild(screenshotsViewController)
+        #else
+        addChild(saveStatesViewController2)
+        addChild(screenshotsViewController2)
+        #endif
         addChild(homebrewViewController)
     }
     
@@ -194,11 +205,19 @@ class OELibraryController: NSViewController {
         case .games:
             return libraryGamesViewController
             
+        #if !USE_NEW
         case .saveStates:
             return saveStatesViewController
-            
+
         case .screenshots:
             return screenshotsViewController
+        #else
+        case .saveStates:
+            return saveStatesViewController2
+
+        case .screenshots:
+            return screenshotsViewController2
+        #endif
             
         case .homebrew:
             return homebrewViewController
@@ -319,7 +338,11 @@ class OELibraryController: NSViewController {
             games.count == 1
         else { return }
         
-        delegate?.libraryController?(self, didSelectSaveState: games.first!)
+        start(saveState: games.first!)
+    }
+    
+    func start(saveState: OEDBSaveState) {
+        delegate?.libraryController?(self, didSelectSaveState: saveState)
     }
 
     @objc(startSelectedGameWithSaveState:)
@@ -342,8 +365,9 @@ class OELibraryController: NSViewController {
     
     var libraryGamesViewController: OELibraryGamesViewController!
     var saveStatesViewController: OEMediaViewController!
+    var saveStatesViewController2: SaveStateViewController!
     var screenshotsViewController: OEMediaViewController!
-    var screenshotsViewController2: ScreenshotsViewController!
+    var screenshotsViewController2: ScreenshotViewController!
     var homebrewViewController: OEHomebrewViewController!
     
 }

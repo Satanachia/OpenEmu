@@ -24,9 +24,11 @@
 
 import Cocoa
 
-class CollectionViewItem: NSCollectionViewItem {
+class ImageCollectionViewItem: NSCollectionViewItem {
     
     var selectionLayer: CALayer?
+    
+    @IBOutlet var subtitleField: NSTextField?
     
     var imageURL: URL?
     
@@ -53,6 +55,10 @@ class CollectionViewItem: NSCollectionViewItem {
     
     override func prepareForReuse() {
         super.prepareForReuse()
+        imageURL = nil
+        imageView?.image = nil
+        textField?.stringValue = ""
+        subtitleField?.stringValue = ""
         selectionLayer?.removeFromSuperlayer()
         selectionLayer = nil
     }
@@ -88,5 +94,15 @@ class CollectionViewItem: NSCollectionViewItem {
             sel.removeFromSuperlayer()
             selectionLayer = nil
         }
+    }
+}
+
+extension ImageCollectionViewItem: QLPreviewItem {
+    var previewItemURL: URL! {
+        return imageURL
+    }
+    
+    var previewItemTitle: String! {
+        return imageURL?.lastPathComponent
     }
 }
